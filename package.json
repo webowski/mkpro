@@ -1,0 +1,14 @@
+{
+  "name": "mkpro",
+  "version": "0.0.1",
+  "description": "Project maker",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fs-extra": "^9.0.1"
+  }
+}
