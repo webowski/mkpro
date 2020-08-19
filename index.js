@@ -1,6 +1,7 @@
 const fs        = require('fs-extra')
 const clc       = require('cli-color')
 const os        = require('os')
+const path      = require('path')
 
 const config    = JSON.parse(fs.readFileSync('config.json', 'utf8'))
 
