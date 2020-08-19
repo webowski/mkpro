@@ -1,18 +1,25 @@
 {
-	"projectName": "project-name-2",
-	"location": {
-		"projects": "~/projects/",
-		"repos": "~/vhosts/"
+	"project": {
+		"name": "project-name",
+		"location": "~/projects/",
+		"folders": [
+			"documents",
+			"content",
+			"mockup",
+			"raw"
+		],
+		"files": [
+			"documents/access.md"
+		]
 	},
-	"folders": [
-		"documents",
-		"content",
-		"mockup",
-		"raw"
-	],
-	"files": [
-		"documents/access.md"
-	],
-	"gitRepo": "",
-	"projectType": "sublime-text"
+	"host": {
+		"domain": "domain.dev",
+		"location": "~/vhosts",
+		"cms": "wordpress"
+	},
+	"repo": {
+		"url": "",
+		"location": "~/vhosts"
+	},
+	"editor": "sublime-text"
 }

@@ -17,13 +17,13 @@ const color = {
 const bold = clc.bold
 
 // Create folders
-let projectsPath = config.location.projects
-if (projectsPath[0] === '~') {
-	projectsPath = projectsPath.replace('~', os.homedir())
+let projectLocation = config.project.location
+if (projectLocation[0] === '~') {
+	projectLocation = projectLocation.replace('~', os.homedir())
 }
 
-let filePath = projectsPath + config.projectName + '/' + config.files[0]
-// let filePath = '~/' + config.projectName + '/' + config.files[0]
+let filePath = path.join(projectLocation, config.project.name, config.project.files[0])
+// let filePath = path.join('~/', config.project.name, config.project.files[0])
 fs.createFileSync(filePath, (err) => {
 	console.log( color.error(err) );
 })
@@ -47,12 +47,12 @@ fs.writeFileSync(filePath, accessContent, (err) => {
 console.log(
 	'\n' +
 	'File',
-	color.file(config.projectName + '/' + config.files[0]),
+	color.file(config.project.name + '/' + config.project.files[0]),
 	'is created'
 )
 
 console.log(
-	color.success('Success.'),
+	color.success('Success'),
 	'\n'
 )
 
