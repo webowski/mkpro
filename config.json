@@ -1,25 +1,15 @@
 {
 	"project": {
 		"name": "project-name",
-		"location": "~/projects/",
-		"folders": [
-			"documents",
-			"content",
-			"mockup",
-			"raw"
-		],
-		"files": [
-			"documents/access.md"
-		]
+		"location": "~/projects",
+		"blank": "https://github.com/webowski/project-folder-blank/archive/main.zip"
 	},
 	"host": {
-		"domain": "domain.dev",
-		"location": "~/vhosts",
-		"cms": "wordpress"
+		"domain": "project-name.dev",
+		"location": "~/vhosts"
 	},
 	"repo": {
 		"url": "",
-		"location": "~/vhosts"
-	},
-	"editor": "sublime-text"
+		"location": "~/repos"
+	}
 }
