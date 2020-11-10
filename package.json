@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "adm-zip": "^0.4.16",
     "cli-color": "^2.0.0",
     "fs-extra": "^9.0.1",
     "node-fetch": "^2.6.1",
