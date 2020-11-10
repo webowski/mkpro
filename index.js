@@ -7,6 +7,7 @@ const os           = require('os')
 const path         = require('path')
 const AdmZip       = require('adm-zip')
 const fetch        = require('node-fetch')
+const readdirp     = require('readdirp')
 
 let config         = require('./config.json')
 
@@ -107,7 +108,27 @@ let blankArchiveUrl = config.project.blank
 downloadFile( blankArchiveUrl, filepath => {
 
 	unpackArchive(filepath, () => {
-		removeFile( filepath )
+
+		// https://github.com/paulmillr/readdirp
+		readdirp( projectPath , {
+			fileFilter: [
+				'.keep',
+				'README.md',
+			],
+			alwaysStat: true
+		} )
+			.on('data', (entry) => {
+				const {path, stats: {size}} = entry;
+				console.log(`${JSON.stringify({path, size})}`);
+			})
+			// Optionally call stream.destroy() in `warn()` in order to abort and cause 'close' to be emitted
+			.on('warn', error => console.error('non-fatal error', error))
+			.on('error', error => console.error('fatal error', error))
+			.on('end', () => {
+				console.log('done')
+				removeFile( filepath )
+			})
+
 	})
 })
 
@@ -201,7 +222,7 @@ async function downloadFile(sourceUrl, callback) {
 				'is downloaded',
 			)
 
-			callback(filepath)
+			if (typeof callback === "function") callback(filepath)
 		})
 	})
 }
@@ -256,11 +277,11 @@ function unpackArchive(filepath, callback) {
 			true
 		)
 
-		if ( fileName === '.keep' ) {
-			fs.removeSync(
-				path.join(entryTargetDir, fileName)
-			)
-		}
+		// if ( fileName === '.keep' ) {
+		// 	fs.removeSync(
+		// 		path.join(entryTargetDir, fileName)
+		// 	)
+		// }
 	})
 
 	console.log(
@@ -268,5 +289,5 @@ function unpackArchive(filepath, callback) {
 		'is unpacked',
 	)
 
-	callback()
+	if (typeof callback === "function") callback()
 }
