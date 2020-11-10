@@ -9,7 +9,7 @@
 		"location": "~/vhosts"
 	},
 	"repo": {
-		"url": "",
+		"name": "project-name",
 		"location": "~/repos"
 	}
 }

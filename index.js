@@ -1,19 +1,31 @@
 // Tools
 // -----------------------------------
 
+const fs           = require('fs-extra')
+const clc          = require('cli-color')
+const os           = require('os')
+const path         = require('path')
+const AdmZip       = require('adm-zip')
+const fetch        = require('node-fetch')
+
+let config         = require('./config.json')
+
 const tools = {
-	fs:            require('fs-extra'),
-	clc:           require('cli-color'),
-	os:            require('os'),
-	path:          require('path'),
-	config:        require('./config.json'),
+	fs:            fs,
+	clc:           clc,
+	os:            os,
+	path:          path,
+	config:        config,
+	AdmZip:        AdmZip,
+	fetch:         fetch,
 }
 
 // Config special
 let configSpecial = JSON.parse(`{
 	"trello": {
 		"key": "",
-		"token": ""
+		"token": "",
+		"sourceBoard": ""
 	}
 }`)
 
@@ -24,7 +36,7 @@ try {
 }
 
 tools.config = { ...configSpecial, ...tools.config }
-const config = tools.config
+config = tools.config
 
 
 const color = {
@@ -61,7 +73,7 @@ if (tools.fs.existsSync( projectPath )) {
 		'The project folder already exists',
 		tools.color.file( projectPath ),
 	)
-	return false
+	// return false
 }
 
 // Make project folder
@@ -75,64 +87,186 @@ tools.fs.mkdirsSync( projectPath, err => {
 // The project folder blank
 // -----------------------------------
 
+// var fileUrl = config.project.blank;
+
+// request.get({url: fileUrl, encoding: null}, (err, res, body) => {
+
+  // var zip = new AdmZip(body);
+  // var zipEntries = zip.getEntries();
+  // console.log(zipEntries.length);
+
+  // zipEntries.forEach((entry) => {
+  //   if (entry.entryName.match(/readme/i))
+  //     console.log(zip.readAsText(entry));
+  // });
+
+// });
+
+let blankArchiveUrl = config.project.blank
+
+downloadFile( blankArchiveUrl, filepath => {
+
+	unpackArchive(filepath, () => {
+		removeFile( filepath )
+	})
+})
 
 
 // !!!!!!!!!!!!!!!!!!1
 // ТАК СТОП
+console.log( 'done' )
 return false
 
 
-// Sublime text project file
+// // Sublime text project file
+// // -----------------------------------
+
+// let editorProjectFile = tools.path.join(projectPath, projectName + '.sublime-project')
+// files.push(editorProjectFile)
+
+// let filePath = tools.path.join(projectLocation, projectName, config.project.files[0])
+
+// // let filePath = tools.path.join('~/', projectName, config.project.files[0])
+// files.forEach(file => {
+// 	tools.fs.createFileSync(file, (err) => {
+// 		console.log( color.error(err) )
+// 	})
+// })
+
+// let editorProjectContent = `{
+// 	"folders":
+// 	[
+// 		{
+// 			"path": "."
+// 		},
+// 		{
+// 			"path": "~/vhosts/${projectName}",
+// 			"name": "working-copy"
+// 		}
+// 	]
+// }
+// `
+
+// tools.fs.writeFileSync(editorProjectFile, editorProjectContent, (err) => {
+// 	console.log( color.error(err) );
+// })
+
+// console.log(
+// 	'\n' +
+// 	'File',
+// 	color.file(editorProjectFile),
+// 	'is created'
+// )
+
+
+// // Trello board
+// // -----------------------------------
+
+// tools.createBoard( tools )
+
+
+// // End
+// // -----------------------------------
+
+// console.log(
+// 	color.success('Success'),
+// 	'\n'
+// )
+
+
+
+// Functions
 // -----------------------------------
 
-let editorProjectFile = tools.path.join(projectPath, projectName + '.sublime-project')
-files.push(editorProjectFile)
+async function downloadFile(sourceUrl, callback) {
+	const res = await fetch( sourceUrl )
 
-let filePath = tools.path.join(projectLocation, projectName, config.project.files[0])
+	await new Promise((resolve, reject) => {
 
-// let filePath = tools.path.join('~/', projectName, config.project.files[0])
-files.forEach(file => {
-	tools.fs.createFileSync(file, (err) => {
-		console.log( color.error(err) )
+		let filename = getFilenameFromRes(res)
+		let filepath = path.join(projectPath, filename)
+		let fileStream = fs.createWriteStream( filepath )
+
+		res.body.pipe(fileStream)
+
+		res.body.on('error', (err) => {
+			reject(err)
+		})
+
+		fileStream.on('finish', () => {
+			resolve()
+
+			console.log(
+				tools.color.file( filename ),
+				'is downloaded',
+			)
+
+			callback(filepath)
+		})
 	})
-})
-
-let editorProjectContent = `{
-	"folders":
-	[
-		{
-			"path": "."
-		},
-		{
-			"path": "~/vhosts/${projectName}",
-			"name": "working-copy"
-		}
-	]
 }
-`
 
-tools.fs.writeFileSync(editorProjectFile, editorProjectContent, (err) => {
-	console.log( color.error(err) );
-})
+function getFilenameFromRes(res) {
+	let filename = res.headers.get('content-disposition')
+		.split(';')
+		.find(n => n.includes('filename='))
+		.replace('filename=', '')
+		.trim()
+	return filename
+}
 
-console.log(
-	'\n' +
-	'File',
-	color.file(editorProjectFile),
-	'is created'
-)
+function removeFile(targetPath) {
+	fs.removeSync( targetPath )
+	let filename = path.basename(targetPath)
+	console.log(
+		tools.color.file( filename ),
+		'is removed',
+	)
+	return true
+}
 
+function unpackArchive(filepath, callback) {
 
-// Trello board
-// -----------------------------------
+	let zip = new AdmZip(filepath)
+	let zipEntries = zip.getEntries()
+	let targetDirName = path.basename(filepath, '.zip')
 
-tools.createBoard( tools )
+	// Run through the entries array
+	zipEntries.forEach(function(zipEntry) {
 
+		let fileName = path.basename(zipEntry.entryName)
 
-// End
-// -----------------------------------
+		let entryTargetDir =
+			path.dirname(
+				path.join(
+					projectPath,
+					zipEntry.entryName.replace(targetDirName + '/', '')
+				)
+			)
 
-console.log(
-	color.success('Success'),
-	'\n'
-)
+		// Extract entry
+		zip.extractEntryTo(
+			// entry name
+			zipEntry.entryName,
+			// target path
+			entryTargetDir,
+			// maintainEntryPath
+			false,
+			// overwrite
+			true
+		)
+
+		if ( fileName === '.keep' ) {
+			fs.removeSync(
+				path.join(entryTargetDir, fileName)
+			)
+		}
+	})
+
+	console.log(
+		tools.color.file( path.basename(filepath) ),
+		'is unpacked',
+	)
+
+	callback()
+}
