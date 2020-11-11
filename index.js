@@ -353,6 +353,7 @@ function createBoard(boardName, createBoardCb) {
 	createBoardUrl.searchParams.append('name', newBoardName)
 	createBoardUrl.searchParams.append('prefs_background', 'grey')
 	createBoardUrl.searchParams.append('prefs_selfJoin', false)
+	// createBoardUrl.searchParams.append('idOrganization', 0)
 
 	restGetBoardId( sourceBoardUrlId, boardId => {
 
@@ -372,9 +373,9 @@ function restCreateBoard(url, restCreateBoardCb) {
 			// console.log(
 			// 	`Response: ${response.status} ${response.statusText}`
 			// )
-			// console.log(
-			// 	response.url
-			// )
+			console.log(
+				{ response }
+			)
 			return response.text()
 		})
 		.then(text => {
@@ -409,6 +410,7 @@ function restGetBoardId(boardUrlId, callback) {
 		})
 		.then(text => {
 			let responseObj = JSON.parse(text)
+			// console.log({ responseObj })
 			// console.log(responseObj.name)
 			// console.log(responseObj.id)
 			callback(responseObj.id)
