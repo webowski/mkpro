@@ -352,8 +352,8 @@ function createBoard(boardName, createBoardCb) {
 	createBoardUrl.searchParams.append('token', token)
 	createBoardUrl.searchParams.append('name', newBoardName)
 	createBoardUrl.searchParams.append('prefs_background', 'grey')
-	createBoardUrl.searchParams.append('prefs_selfJoin', false)
-	// createBoardUrl.searchParams.append('idOrganization', 0)
+	// createBoardUrl.searchParams.append('prefs_selfJoin', false)
+	// createBoardUrl.searchParams.append('idOrganization', '\x00')
 
 	restGetBoardId( sourceBoardUrlId, boardId => {
 
