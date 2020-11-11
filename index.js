@@ -8,6 +8,7 @@ const path         = require('path')
 const AdmZip       = require('adm-zip')
 const fetch        = require('node-fetch')
 const readdirp     = require('readdirp')
+const async        = require('async')
 
 let config         = require('./config.json')
 
@@ -56,9 +57,6 @@ tools.color = color
 tools.createBoard = require('./trello.js')(tools)
 
 
-// Project folder
-// -----------------------------------
-
 let projectLocation = config.project.location
 if (projectLocation[0] === '~') {
 	projectLocation = projectLocation.replace('~', tools.os.homedir())
@@ -67,137 +65,85 @@ let projectName = config.project.name
 let projectPath = tools.path.join( projectLocation, projectName )
 
 
-// if folder is exists
-if (tools.fs.existsSync( projectPath )) {
-    console.log(
-		tools.color.error('Error.'),
-		'The project folder already exists',
-		tools.color.file( projectPath ),
-	)
-	// return false
-}
 
-// Make project folder
-tools.fs.mkdirsSync( projectPath, err => {
-	console.log(
-		color.error(err)
-	)
-})
+async.waterfall([
+	// Project folder
+	function(callback) {
 
+		var isFolderCreated = createFolder(projectPath)
 
-// The project folder blank
-// -----------------------------------
+		if ( !isFolderCreated ) {
+			// return scriptEnd('fail')
+		}
+		callback()
+	},
+	// The project folder blank
+	function(callback) {
 
-// var fileUrl = config.project.blank;
+		let blankArchiveUrl = config.project.blank
 
-// request.get({url: fileUrl, encoding: null}, (err, res, body) => {
+		downloadFile( blankArchiveUrl, filepath => {
 
-  // var zip = new AdmZip(body);
-  // var zipEntries = zip.getEntries();
-  // console.log(zipEntries.length);
+			unpackArchive(filepath, () => {
 
-  // zipEntries.forEach((entry) => {
-  //   if (entry.entryName.match(/readme/i))
-  //     console.log(zip.readAsText(entry));
-  // });
+				removeFiles([
+					'.keep',
+					'README.md'
+				], () => {
+					removeFile( filepath )
+					callback()
+				})
 
-// });
-
-let blankArchiveUrl = config.project.blank
-
-downloadFile( blankArchiveUrl, filepath => {
-
-	unpackArchive(filepath, () => {
-
-		// https://github.com/paulmillr/readdirp
-		readdirp( projectPath , {
-			fileFilter: [
-				'.keep',
-				'README.md',
-			],
-			alwaysStat: true
-		} )
-			.on('data', (entry) => {
-				const {path, stats: {size}} = entry;
-				console.log(`${JSON.stringify({path, size})}`);
 			})
-			// Optionally call stream.destroy() in `warn()` in order to abort and cause 'close' to be emitted
-			.on('warn', error => console.error('non-fatal error', error))
-			.on('error', error => console.error('fatal error', error))
-			.on('end', () => {
-				console.log('done')
-				removeFile( filepath )
-			})
-
-	})
+		})
+	},
+	// Rename the editor config file
+	function(callback) {
+		renameConfigFile((newPath) => {
+			config.editorConfig = newPath
+			callback()
+		})
+	},
+	// Edit the editor config file
+	function(callback) {
+		editConfigFile(config.editorConfig, callback)
+	}
+], function(error, result) {
+	scriptEnd('success')
 })
-
-
-// !!!!!!!!!!!!!!!!!!1
-// ТАК СТОП
-console.log( 'done' )
-return false
-
-
-// // Sublime text project file
-// // -----------------------------------
-
-// let editorProjectFile = tools.path.join(projectPath, projectName + '.sublime-project')
-// files.push(editorProjectFile)
-
-// let filePath = tools.path.join(projectLocation, projectName, config.project.files[0])
-
-// // let filePath = tools.path.join('~/', projectName, config.project.files[0])
-// files.forEach(file => {
-// 	tools.fs.createFileSync(file, (err) => {
-// 		console.log( color.error(err) )
-// 	})
-// })
-
-// let editorProjectContent = `{
-// 	"folders":
-// 	[
-// 		{
-// 			"path": "."
-// 		},
-// 		{
-// 			"path": "~/vhosts/${projectName}",
-// 			"name": "working-copy"
-// 		}
-// 	]
-// }
-// `
-
-// tools.fs.writeFileSync(editorProjectFile, editorProjectContent, (err) => {
-// 	console.log( color.error(err) );
-// })
-
-// console.log(
-// 	'\n' +
-// 	'File',
-// 	color.file(editorProjectFile),
-// 	'is created'
-// )
-
-
-// // Trello board
-// // -----------------------------------
-
-// tools.createBoard( tools )
-
-
-// // End
-// // -----------------------------------
-
-// console.log(
-// 	color.success('Success'),
-// 	'\n'
-// )
-
 
 
 // Functions
 // -----------------------------------
+
+function createFolder(projectPath) {
+
+	// if folder is exists
+	if (tools.fs.existsSync( projectPath )) {
+		console.error(
+			tools.color.error('Error.'),
+			'The folder',
+			tools.color.file( projectPath ),
+			'already exists',
+		)
+		return false
+	}
+
+	// Make project folder
+	tools.fs.mkdirsSync( projectPath, err => {
+		console.log(
+			color.error(err)
+		)
+	})
+
+	console.log(
+		'The folder',
+		tools.color.file( projectPath ),
+		'is created',
+	)
+
+	return true
+}
 
 async function downloadFile(sourceUrl, callback) {
 	const res = await fetch( sourceUrl )
@@ -255,33 +201,30 @@ function unpackArchive(filepath, callback) {
 	// Run through the entries array
 	zipEntries.forEach(function(zipEntry) {
 
-		let fileName = path.basename(zipEntry.entryName)
+		if ( ! zipEntry.isDirectory ) {
 
-		let entryTargetDir =
-			path.dirname(
-				path.join(
-					projectPath,
-					zipEntry.entryName.replace(targetDirName + '/', '')
+			let entryName = zipEntry.entryName
+
+			let entryTargetDir =
+				path.dirname(
+					path.join(
+						projectPath,
+						zipEntry.entryName.replace(targetDirName + '/', '')
+					)
 				)
+
+			// Extract entry
+			zip.extractEntryTo(
+				// entry name
+				zipEntry.entryName,
+				// target path
+				entryTargetDir,
+				// maintainEntryPath
+				false,
+				// overwrite
+				true
 			)
-
-		// Extract entry
-		zip.extractEntryTo(
-			// entry name
-			zipEntry.entryName,
-			// target path
-			entryTargetDir,
-			// maintainEntryPath
-			false,
-			// overwrite
-			true
-		)
-
-		// if ( fileName === '.keep' ) {
-		// 	fs.removeSync(
-		// 		path.join(entryTargetDir, fileName)
-		// 	)
-		// }
+		}
 	})
 
 	console.log(
@@ -291,3 +234,96 @@ function unpackArchive(filepath, callback) {
 
 	if (typeof callback === "function") callback()
 }
+
+// argument `files` is string or array of strings
+function removeFiles(files, callback) {
+	readdirp(projectPath , {
+		fileFilter: files,
+		alwaysStat: true
+	})
+		.on('data', (entry) => {
+			// const {path, stats: {size}} = entry
+			// console.log(`${JSON.stringify({path, size})}`)
+			// console.log( entry.path )
+			fs.removeSync( path.join(projectPath, entry.path) )
+		})
+		// Optionally call stream.destroy() in `warn()` in order to abort and cause 'close' to be emitted
+		.on('warn', error => console.error('non-fatal error', error))
+		.on('error', error => console.error('fatal error', error))
+		.on('end', () => {
+			if (typeof callback === 'function') callback()
+		})
+}
+
+function scriptEnd(type) {
+	type = type || 'fail'
+
+	if (type === 'success') {
+		console.log(
+			color.success('Success.'),
+			'The project',
+			color.file(projectName),
+			'is created',
+		)
+		return true
+	} else {
+		console.log(
+			color.error('The end.'),
+			color.file('mkpro'),
+			'execution is stopped'
+		)
+		return false
+	}
+}
+
+// Sublime text project file
+// returns new file path
+function renameConfigFile(callback) {
+
+	fs.readdir(projectPath, (error, files) => {
+
+		let projectConfigName = files.find( name => {
+			return name.match(/.*\.sublime-project/)
+		})
+
+		if ( !projectConfigName ) return false
+
+		let newProjectConfigName = projectName + path.extname(projectConfigName)
+
+		let oldPath = path.join(projectPath, projectConfigName)
+		let newPath = path.join(projectPath, newProjectConfigName)
+
+
+		fs.rename(oldPath, newPath, (error) => {
+			if (error) throw error
+
+			console.log(
+				'File',
+				color.file(projectConfigName),
+				'is renamed to',
+				color.file(newProjectConfigName),
+			)
+
+			if (typeof callback === 'function') callback(newPath)
+		})
+	})
+
+}
+
+function editConfigFile(filePath, callback) {
+
+	fs.readFile( filePath, 'utf8', (error, data) => {
+		if (error) throw error;
+
+		var content = eval('`' + data + '`')
+
+		fs.writeFile( filePath, content, error => {
+			if (error) throw error;
+
+			callback()
+		})
+	})
+}
+
+// Trello board
+// tools.createBoard( tools )

@@ -1,15 +1,15 @@
 {
 	"project": {
-		"name": "project-name",
+		"name": "new-project",
 		"location": "~/projects",
 		"blank": "https://github.com/webowski/project-folder-blank/archive/main.zip"
 	},
 	"host": {
-		"domain": "project-name.dev",
+		"domain": "new-project.dev",
 		"location": "~/vhosts"
 	},
 	"repo": {
-		"name": "project-name",
+		"name": "new-project",
 		"location": "~/repos"
 	}
 }
