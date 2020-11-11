@@ -320,12 +320,15 @@ function renameConfigFile(callback) {
 function editConfigFile(filePath, callback) {
 
 	fs.readFile( filePath, 'utf8', (error, data) => {
-		if (error) throw error;
+		if (error) throw error
 
-		var content = eval('`' + data + '`')
+		let vhostPath = path.join( '~/vhosts', projectName, '.loc' )
+		let repoPath = path.join( '~/repos', projectName )
+
+		let content = eval('`' + data + '`')
 
 		fs.writeFile( filePath, content, error => {
-			if (error) throw error;
+			if (error) throw error
 
 			callback()
 		})
