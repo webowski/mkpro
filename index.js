@@ -322,7 +322,7 @@ function editConfigFile(filePath, callback) {
 	fs.readFile( filePath, 'utf8', (error, data) => {
 		if (error) throw error
 
-		let vhostPath = path.join( '~/vhosts', projectName, '.loc' )
+		let vhostPath = path.join( '~/vhosts', projectName + '.loc' )
 		let repoPath = path.join( '~/repos', projectName )
 
 		let content = eval('`' + data + '`')
