@@ -290,7 +290,7 @@ function renameConfigFile(callback) {
 	fs.readdir(projectPath, (error, files) => {
 
 		let projectConfigName = files.find( name => {
-			return name.match(/.*\.sublime-project/)
+			return name.match(/.*\.code-workspace/)
 		})
 
 		if ( !projectConfigName ) return false
