@@ -5,7 +5,7 @@
 		"blank": "https://github.com/webowski/project-folder-blank/archive/main.zip"
 	},
 	"host": {
-		"domain": "new-project.dev",
+		"domain": "new-project.loc",
 		"location": "~/vhosts"
 	},
 	"repo": {
