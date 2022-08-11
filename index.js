@@ -96,6 +96,7 @@ async.waterfall([
 				})
 
 			})
+
 		})
 	},
 	// Rename the editor config file
