@@ -110,12 +110,12 @@ async.waterfall([
 	function(callback) {
 		editConfigFile(config.editorConfig, callback)
 	},
-	// Trello board
-	function(callback) {
-		createBoard( tools.config.project.name, () => {
-			callback()
-		})
-	}
+	// // Trello board
+	// function(callback) {
+	// 	createBoard( tools.config.project.name, () => {
+	// 		callback()
+	// 	})
+	// }
 ], function(error, result) {
 	scriptEnd('success')
 })
