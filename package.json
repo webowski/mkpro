@@ -1,22 +1,14 @@
 {
-  "name": "mkpro",
-  "version": "0.0.1",
-  "description": "Project maker",
-  "main": "index.js",
-  "scripts": {
-    "create": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
+	"name": "mkpro",
+	"version": "1.0.0",
+  "author": "webowski",
   "license": "ISC",
-  "dependencies": {
-    "adm-zip": "^0.4.16",
-    "async": "^3.2.0",
-    "cli-color": "^2.0.0",
-    "fs-extra": "^9.0.1",
-    "node-fetch": "^2.6.1",
-    "os": "^0.1.1",
-    "path": "^0.12.7",
-    "readdirp": "^3.5.0"
-  }
+	"description": "Creates project start folders and files",
+  "type": "module",
+	"bin": {
+		"mkpro": "./index.mjs"
+	},
+	"dependencies": {
+		"fs-extra": "^11.2.0"
+	}
 }
