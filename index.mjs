@@ -70,7 +70,7 @@ class MkPro {
 		}
 
 		// --- Создаём дополнительные папки ---
-		let workspaceFolders = [{ path: "." }]
+		let workspaceFolders = [{ name: "project", path: "." }]
 		if (this.flags.repo) {
 			await fs.ensureDir(repoDir)
 			workspaceFolders.unshift({ name: "repo", path: repoDir })
