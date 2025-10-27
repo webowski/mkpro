@@ -1,13 +1,16 @@
 {
 	"name": "mkpro",
 	"version": "1.0.0",
-  "author": "webowski",
+  "author": "webowski <okwebowski@gmail.com> (https://github.com/webowski)",
   "license": "ISC",
 	"description": "Creates project start folders and files",
   "type": "module",
 	"bin": {
-		"mkpro": "./index.mjs"
+		"mkpro": "index.mjs"
 	},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
 	"dependencies": {
 		"fs-extra": "^11.2.0"
 	}
