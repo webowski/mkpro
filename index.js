@@ -2,6 +2,12 @@
 import MkPro from './MkPro.js'
 import { createConfig } from './ConfigManager.js'
 
-const mkpro = new MkPro(process.argv.slice(2))
+const args = process.argv.slice(2)
 
-mkpro.run()
+// Check if --config flag is present
+if (args.includes('--config')) {
+	createConfig()
+} else {
+	const mkpro = new MkPro(args)
+	mkpro.run()
+}
