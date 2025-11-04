@@ -15,7 +15,6 @@ export async function createConfig() {
 
 	spacing()
 	console.log(pc.bgBlue('    mkpro configuration    '))
-	spacing()
 
 	// Ensure config directory exists
 	await fs.ensureDir(path.dirname(configPath))
@@ -37,7 +36,7 @@ export async function createConfig() {
 		spacing()
 		// Use fileSelector to choose target directory
 		const targetDir = await fileSelector({
-			message: `Select target directory for ${dirType.name}:`,
+			message: `Select the folder in which the ${pc.blue(dirType.name)} folder will be placed:`,
 			validate: (path) => fs.statSync(path).isDirectory(),
 			default: os.homedir(),
 			filter: item => item.isDirectory,

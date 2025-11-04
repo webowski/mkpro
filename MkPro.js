@@ -3,6 +3,8 @@ import path from 'path'
 import os from 'os'
 import pc from 'picocolors'
 import { exec } from 'child_process'
+import { getConfigPath } from './ConfigManager.js'
+import { spacing } from './Helpers.js'
 
 export default class MkPro {
 	constructor(args) {
@@ -11,15 +13,31 @@ export default class MkPro {
 		this.name = this.extractName(args)
 		this.home = os.homedir()
 
-		this.paths = {
-			projects: path.join(this.home, "projects"),
-			vhosts: path.join(this.home, "vhosts"),
-			repos: path.join(this.home, "repos"),
+		// Load paths from config, fallback to default paths if config doesn't exist
+		this.paths = this.loadPathsFromConfig()
+	}
+
+	loadPathsFromConfig() {
+		const configPath = getConfigPath()
+		try {
+			const config = fs.readJsonSync(configPath)
+			if (!config.paths) {
+				console.error("Config file is missing 'paths' property")
+				process.exit(1)
+			}
+			return config.paths
+		} catch (error) {
+			console.error("Config file does not exist or is invalid. Run 'mkpro --config' to create a configuration.")
+			process.exit(1)
 		}
 	}
 
 	async run() {
 		const { project, host, repo } = this.flags
+
+		spacing()
+		console.log(pc.bgBlue('    mkpro    '))
+		spacing()
 
 		if (!project && !host && !repo) {
 			// By default mkpro <name> = mkpro -p <name>
@@ -101,25 +119,30 @@ export default class MkPro {
 
 		console.log(`✅ Project created: ${projectDir}`)
 		console.log(`📂 Subfolders: ${subdirs.join(", ")}`)
-		if (this.flags.repo) console.log(`📦 Repository: ${repoDir}`)
-		if (this.flags.host) console.log(`🌐 Host: ${hostDir}`)
-		console.log(`🗂  Workspace: ${workspaceFile}`)
+		if (this.flags.repo) console.log(`Repository: ${repoDir}`)
+		if (this.flags.host) console.log(`Host: ${hostDir}`)
+		console.log(`Workspace: ${workspaceFile}`)
 
-		if (this.flags.repo) {
-			console.log(`\n To go to the repository folder:`)
-			console.log(`cd ~/repos/${this.name}\n`)
-		}
-		if (this.flags.host) {
-			console.log(`\n To go to the host folder:`)
-			console.log(`cd ~/vhosts/${this.name}.local\n`)
-		}
+		// if (this.flags.repo) {
+		// 	console.log(`\n To go to the repository folder:`)
+		// 	console.log(`cd ~/repos/${this.name}\n`)
+		// }
+
+		// if (this.flags.host) {
+		// 	console.log(`\n To go to the host folder:`)
+		// 	console.log(`cd ~/vhosts/${this.name}.local\n`)
+		// }
+
+		spacing()
+		console.log(pc.bgCyan('    Done    '))
+		spacing()
 
 		this.openVSCode(workspaceFile)
 	}
 
 	async createHost() {
 		if (!this.name) {
-			console.error("❌ Specify host name: mkpro -h <hostname>")
+			console.error("Specify host name: mkpro -h <hostname>")
 			process.exit(1)
 		}
 
@@ -130,19 +153,19 @@ export default class MkPro {
 
 	async createRepo() {
 		if (!this.name) {
-			console.error("❌ Specify repository name: mkpro -r <reponame>")
+			console.error("Specify repository name: mkpro -r <reponame>")
 			process.exit(1)
 		}
 
 		const repoDir = path.join(this.paths.repos, this.name)
 		await fs.ensureDir(repoDir)
-		console.log(`📦 Repository created: ${repoDir}`)
+		console.log(`Repository created: ${repoDir}`)
 	}
 
 	openVSCode(workspaceFile) {
 		exec(`code "${workspaceFile}"`, (err) => {
 			if (err) {
-				console.warn("⚠️  Failed to open VS Code. Check if 'code' command is in PATH.")
+				console.warn("Failed to open VS Code. Check if 'code' command is in PATH.")
 			}
 		})
 	}
