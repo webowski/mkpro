@@ -1,10 +1,9 @@
-#!/usr/bin/env node
-import fs from "fs-extra"
-import path from "path"
-import os from "os"
-import { exec } from "child_process"
+import fs from 'fs-extra'
+import path from 'path'
+import os from 'os'
+import { exec } from 'child_process'
 
-class MkPro {
+export default class MkPro {
 	constructor(args) {
 		this.args = args
 		this.flags = this.parseFlags(args)
@@ -147,7 +146,3 @@ class MkPro {
 		else if (repo) await this.createRepo()
 	}
 }
-
-// --- Запуск ---
-const mkpro = new MkPro(process.argv.slice(2))
-mkpro.run()
