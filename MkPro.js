@@ -5,6 +5,7 @@ import pc from 'picocolors'
 import { exec } from 'child_process'
 import { getConfigPath } from './ConfigManager.js'
 import { spacing } from './Helpers.js'
+import { confirm } from '@inquirer/prompts'
 
 export default class MkPro {
 	constructor(args) {
@@ -136,9 +137,15 @@ export default class MkPro {
 		spacing()
 		console.log(pc.bgCyan('    Done    '))
 		spacing()
-
-		this.openVSCode(workspaceFile)
+		const shouldOpenVSCode = await confirm({ message: 'Open the project in VS Code?' })
+		if (shouldOpenVSCode) {
+			console.log("Opening VS Code...")
+			this.openVSCode(workspaceFile)
+		} else {
+			console.log("VS Code opening cancelled.")
+		}
 	}
+
 
 	async createHost() {
 		if (!this.name) {
