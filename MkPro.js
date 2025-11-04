@@ -17,6 +17,21 @@ export default class MkPro {
 		}
 	}
 
+	async run() {
+		const { project, host, repo } = this.flags
+
+		if (!project && !host && !repo) {
+			// By default mkpro <name> = mkpro -p <name>
+			this.flags.project = true
+			await this.createProject()
+			return
+		}
+
+		if (project) await this.createProject()
+		else if (host) await this.createHost()
+		else if (repo) await this.createRepo()
+	}
+
 	parseFlags(args) {
 		const flags = {
 			project: false,
@@ -129,20 +144,5 @@ export default class MkPro {
 				console.warn("⚠️  Failed to open VS Code. Check if 'code' command is in PATH.")
 			}
 		})
-	}
-
-	async run() {
-		const { project, host, repo } = this.flags
-
-		if (!project && !host && !repo) {
-			// By default mkpro <name> = mkpro -p <name>
-			this.flags.project = true
-			await this.createProject()
-			return
-		}
-
-		if (project) await this.createProject()
-		else if (host) await this.createHost()
-		else if (repo) await this.createRepo()
 	}
 }
