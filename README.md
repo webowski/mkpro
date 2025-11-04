@@ -1,10 +1,10 @@
 # mkpro
 
-| Команда           | Действие                                  |
+| Command           | Action                                    |
 | ----------------- | ----------------------------------------- |
-| `mkpro myapp`     | создать проект (аналог `-p`)              |
-| `mkpro -p myapp`  | создать проект                            |
-| `mkpro -h mysite` | создать хост `~/vhosts/mysite.local`      |
-| `mkpro -r myrepo` | создать репозиторий `~/repos/myrepo`      |
-| `mkpro -ph myapp` | проект + хост + добавить хост в workspace |
-| `mkpro -pr myapp` | проект + репо + добавить репо в workspace |
+| `mkpro myapp`     | create project (equivalent to `-p`)       |
+| `mkpro -p myapp`  | create project                            |
+| `mkpro -h mysite` | create host `~/vhosts/mysite.local`       |
+| `mkpro -r myrepo` | create repository `~/repos/myrepo`        |
+| `mkpro -ph myapp` | project + host + add host to workspace    |
+| `mkpro -pr myapp` | project + repo + add repo to workspace    |

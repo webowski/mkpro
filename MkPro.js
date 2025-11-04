@@ -28,7 +28,7 @@ export default class MkPro {
 		if (args.includes("-h")) flags.host = true
 		if (args.includes("-r")) flags.repo = true
 
-		// Комбинированные короткие ключи (-ph, -pr и т.д.)
+		// Combined short flags (-ph, -pr etc.)
 		for (const arg of args) {
 			if (arg.startsWith("-")) {
 				if (arg.includes("p")) flags.project = true
@@ -41,13 +41,13 @@ export default class MkPro {
 	}
 
 	extractName(args) {
-		// Имя проекта / хоста / репо — первый аргумент без флагов
+		// Project / host / repo name - first argument without flags
 		return args.find((a) => !a.startsWith("-"))
 	}
 
 	async createProject() {
 		if (!this.name) {
-			console.error("❌ Укажите название проекта: mkpro -p <name>")
+			console.error("❌ Specify project name: mkpro -p <name>")
 			process.exit(1)
 		}
 
@@ -65,7 +65,7 @@ export default class MkPro {
 
 		const readmePath = path.join(projectDir, "README.md")
 		if (!(await fs.pathExists(readmePath))) {
-			await fs.writeFile(readmePath, `# ${this.name}\n\nОписание проекта.\n`)
+			await fs.writeFile(readmePath, `# ${this.name}\n\nProject description.\n`)
 		}
 
 		// --- Создаём дополнительные папки ---
@@ -83,18 +83,18 @@ export default class MkPro {
 		const workspaceData = { folders: workspaceFolders, settings: {} }
 		await fs.writeJson(workspaceFile, workspaceData, { spaces: "\t" })
 
-		console.log(`✅ Проект создан: ${projectDir}`)
-		console.log(`📂 Подпапки: ${subdirs.join(", ")}`)
-		if (this.flags.repo) console.log(`📦 Репозиторий: ${repoDir}`)
-		if (this.flags.host) console.log(`🌐 Хост: ${hostDir}`)
+		console.log(`✅ Project created: ${projectDir}`)
+		console.log(`📂 Subfolders: ${subdirs.join(", ")}`)
+		if (this.flags.repo) console.log(`📦 Repository: ${repoDir}`)
+		if (this.flags.host) console.log(`🌐 Host: ${hostDir}`)
 		console.log(`🗂  Workspace: ${workspaceFile}`)
 
 		if (this.flags.repo) {
-			console.log(`\n Чтобы перейти в папку репозитория:`)
+			console.log(`\n To go to the repository folder:`)
 			console.log(`cd ~/repos/${this.name}\n`)
 		}
 		if (this.flags.host) {
-			console.log(`\n Чтобы перейти в папку хоста:`)
+			console.log(`\n To go to the host folder:`)
 			console.log(`cd ~/vhosts/${this.name}.local\n`)
 		}
 
@@ -103,30 +103,30 @@ export default class MkPro {
 
 	async createHost() {
 		if (!this.name) {
-			console.error("❌ Укажите имя хоста: mkpro -h <hostname>")
+			console.error("❌ Specify host name: mkpro -h <hostname>")
 			process.exit(1)
 		}
 
 		const hostDir = path.join(this.paths.vhosts, `${this.name}.local`)
 		await fs.ensureDir(hostDir)
-		console.log(`🌐 Хост создан: ${hostDir}`)
+		console.log(`🌐 Host created: ${hostDir}`)
 	}
 
 	async createRepo() {
 		if (!this.name) {
-			console.error("❌ Укажите имя репозитория: mkpro -r <reponame>")
+			console.error("❌ Specify repository name: mkpro -r <reponame>")
 			process.exit(1)
 		}
 
 		const repoDir = path.join(this.paths.repos, this.name)
 		await fs.ensureDir(repoDir)
-		console.log(`📦 Репозиторий создан: ${repoDir}`)
+		console.log(`📦 Repository created: ${repoDir}`)
 	}
 
 	openVSCode(workspaceFile) {
 		exec(`code "${workspaceFile}"`, (err) => {
 			if (err) {
-				console.warn("⚠️  Не удалось открыть VS Code. Проверь наличие команды 'code' в PATH.")
+				console.warn("⚠️  Failed to open VS Code. Check if 'code' command is in PATH.")
 			}
 		})
 	}
@@ -135,7 +135,7 @@ export default class MkPro {
 		const { project, host, repo } = this.flags
 
 		if (!project && !host && !repo) {
-			// По умолчанию mkpro <name> = mkpro -p <name>
+			// By default mkpro <name> = mkpro -p <name>
 			this.flags.project = true
 			await this.createProject()
 			return
