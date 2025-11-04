@@ -1,6 +1,6 @@
 {
 	"name": "mkpro",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"author": "webowski <okwebowski@gmail.com> (https://github.com/webowski)",
 	"license": "ISC",
 	"description": "Creates project start folders and files",
